@@ -136,19 +136,59 @@
         
         \item \textbf{如何将求和形式转写成向量（矩阵）乘积的形式}：
         \begin{itemize}
-            \item 一般是将所有的向量排成列向量（例如将目标值排成列向量 $\boldsymbol{y}$，特征排成矩阵 $\boldsymbol{X}$）。
-            \item 然后看如何进行维数匹配，将求和转换为矩阵乘积。
+            \item \textbf{第一步：定义矩阵和向量}。我们将所有的目标值排成一个 $N$ 维列向量 $\boldsymbol{y} = \left[y^{(1)}, y^{(2)}, \cdots, y^{(N)}\right]^{\top}$。由于每个样本的特征 $\boldsymbol{x}^{(n)}$ 通常也是一个列维度（如 $M$ 维）的向量，我们将所有的特征向量按列连续拼接，形成特征矩阵 $\boldsymbol{X} = \left[\boldsymbol{x}^{(1)}, \boldsymbol{x}^{(2)}, \cdots, \boldsymbol{x}^{(N)}\right]$。
+            \item \textbf{第二步：利用内积的转置性质}。注意到模型单个样本的输出预测值 $\boldsymbol{w}^{\top} \boldsymbol{x}^{(n)}$ 是一个标量。标量的转置等于它本身，因此我们可以进行如下等价变形：
+            \begin{equation*}
+                \boldsymbol{w}^{\top} \boldsymbol{x}^{(n)} = \left(\boldsymbol{w}^{\top} \boldsymbol{x}^{(n)}\right)^{\top} = \left(\boldsymbol{x}^{(n)}\right)^{\top} \boldsymbol{w}
+            \end{equation*}
+            \item \textbf{第三步：组合成预测向量}。我们将所有 $N$ 个样本的标量预测值自上而下排成一个列向量，再利用分块矩阵乘法可以写成：
+            \begin{equation*}
+                \hat{\boldsymbol{y}} = \begin{bmatrix} \left(\boldsymbol{x}^{(1)}\right)^{\top} \boldsymbol{w} \\ \left(\boldsymbol{x}^{(2)}\right)^{\top} \boldsymbol{w} \\ \vdots \\ \left(\boldsymbol{x}^{(N)}\right)^{\top} \boldsymbol{w} \end{bmatrix} = \begin{bmatrix} \left(\boldsymbol{x}^{(1)}\right)^{\top} \\ \left(\boldsymbol{x}^{(2)}\right)^{\top} \\ \vdots \\ \left(\boldsymbol{x}^{(N)}\right)^{\top} \end{bmatrix} \boldsymbol{w} = \boldsymbol{X}^{\top} \boldsymbol{w}
+            \end{equation*}
+            这样，$\boldsymbol{X}^{\top} \boldsymbol{w}$ 就表示了包含了所有样本预测结果的 $N$ 维列向量。
+            \item \textbf{第四步：向范数形式转换}。原风险公式的求和实际是所有真实值与预测值差值的平方和。我们可以将整体差值定义为误差向量 $\boldsymbol{e} = \boldsymbol{y} - \boldsymbol{X}^{\top} \boldsymbol{w}$。由于各项平方之和正是对应列向量与其自身的内积（即 $\ell_2$ 范数的平方）：
+            \begin{equation*}
+                \sum_{n=1}^N\left(y^{(n)}-\boldsymbol{w}^{\top} \boldsymbol{x}^{(n)}\right)^2 = \sum_{n=1}^N e_n^2 = \boldsymbol{e}^{\top}\boldsymbol{e} = \|\boldsymbol{e}\|^2
+            \end{equation*}
         \end{itemize}
-        通过上述技巧，经验风险可以等价地表示为：
+        经过上述详细拆解转换，经验风险就可以等价地表示为紧凑优美的矩阵范数形式：
         \begin{equation*}
         \mathcal{R}(\boldsymbol{w}) =\frac{1}{2}\left\|\boldsymbol{y}-\boldsymbol{X}^{\top} \boldsymbol{w}\right\|^2
         \end{equation*}
 
-        \item \textbf{补充：矩阵微积分基础}。为了求解使得经验风险最小化的最优参数 $\boldsymbol{w}^*$，我们需要用到矩阵微积分知识（无需详细推导，掌握公式即可）：
+        \item \textbf{补充：矩阵微积分基础}。多元函数的复合求导需要非常严谨，同学们可以先回忆一下在多元微积分中，多变量函数的复合导数是如何通过偏导数求和链式法则计算的。在机器学习中，为了推导导致经验风险最小化的最优参数 $\boldsymbol{w}^*$，我们使用矩阵微积分将这些求和项写成优雅的矩阵和向量形式。
+
         \begin{itemize}
-            \item \textbf{标量关于向量的偏导}：例如 $\frac{\partial (\boldsymbol{a}^{\top}\boldsymbol{x})}{\partial \boldsymbol{x}} = \boldsymbol{a}$
-            \item \textbf{向量关于向量的偏导}：例如 $\frac{\partial (\boldsymbol{A}\boldsymbol{x})}{\partial \boldsymbol{x}} = \boldsymbol{A}^{\top}$
-            \item \textbf{向量函数及其导数与链式法则}：与标量函数的求导法则类似，但需严格注意矩阵乘法的维数匹配。
+            \item \textbf{下标表示法与乘法求和记号}：
+            我们常用下标法表示矩阵的元素，例如 $\boldsymbol{A} = (a_{ij})$。利用求和记号，我们可以定义：
+            \begin{itemize}
+                \item 矩阵与向量的乘法 $\boldsymbol{y} = \boldsymbol{A}\boldsymbol{x}$，其第 $i$ 个分量表示为 $y_i = \sum_{k} a_{ik} x_k$。
+                \item 矩阵与矩阵的乘法 $\boldsymbol{C} = \boldsymbol{A}\boldsymbol{B}$，其第 $(i, j)$ 个元素表示为 $c_{ij} = \sum_{k} a_{ik} b_{kj}$。
+            \end{itemize}
+
+            \item \textbf{偏导数的定义}：
+            对于向量函数 $\boldsymbol{y}=f(\boldsymbol{x}) \in \mathbb{R}^N$，其中 $\boldsymbol{x} \in \mathbb{R}^M$。我们采用分母布局来定义向量关于向量的偏导数矩阵，其第 $(i, j)$ 个元素定义为 $\left(\frac{\partial \boldsymbol{y}}{\partial \boldsymbol{x}}\right)_{ij} = \frac{\partial y_j}{\partial x_i}$。此时雅可比矩阵为：
+            \begin{align*}
+            \frac{\partial \boldsymbol{y}}{\partial \boldsymbol{x}} = \left[\begin{array}{ccc}
+            \frac{\partial y_1}{\partial x_1} & \cdots & \frac{\partial y_N}{\partial x_1} \\
+            \vdots & \ddots & \vdots \\
+            \frac{\partial y_1}{\partial x_M} & \cdots & \frac{\partial y_N}{\partial x_M}
+            \end{array}\right] \in \mathbb{R}^{M \times N}
+            \end{align*}
+            当目标退化为标量 $y$ 时（即 $N=1$），标量关于向量的偏导数为列向量：$\frac{\partial y}{\partial \boldsymbol{x}}=\left[\frac{\partial y}{\partial x_1}, \cdots, \frac{\partial y}{\partial x_M}\right]^{\top}$。
+
+            \item \textbf{简单导数的推导}：
+            \begin{itemize}
+                \item 第一基本求导：显然 $\frac{\partial \boldsymbol{x}}{\partial \boldsymbol{x}}=\boldsymbol{I}$。
+                \item 考虑 $\boldsymbol{y} = \boldsymbol{A}\boldsymbol{x}$，由 $y_j = \sum_{k} a_{jk} x_k$ 可知 $\frac{\partial y_j}{\partial x_i} = a_{ji}$。因此矩阵的 $(i, j)$ 元素即为 $\boldsymbol{A}$ 的转置的 $(i, j)$ 元素，故 $\frac{\partial \boldsymbol{A} \boldsymbol{x}}{\partial \boldsymbol{x}}=\boldsymbol{A}^{\top}$。
+                \item 同理推导可知：$\frac{\partial \boldsymbol{x}^{\top} \boldsymbol{A}}{\partial \boldsymbol{x}}=\boldsymbol{A}$。
+            \end{itemize}
+
+            \item \textbf{链式法则}：
+            设 $\boldsymbol{x} \in \mathbb{R}^M, \boldsymbol{y}=g(\boldsymbol{x}) \in \mathbb{R}^K, \boldsymbol{z}=f(\boldsymbol{y}) \in \mathbb{R}^N$。根据多元微积分的求导法则，有 $\frac{\partial z_j}{\partial x_i} = \sum_{k} \frac{\partial y_k}{\partial x_i} \frac{\partial z_j}{\partial y_k} = \sum_{k} \left(\frac{\partial \boldsymbol{y}}{\partial \boldsymbol{x}}\right)_{ik} \left(\frac{\partial \boldsymbol{z}}{\partial \boldsymbol{y}}\right)_{kj}$。结合矩阵乘法的定义，这恰好是两个导数矩阵的乘积：
+            \begin{align*}
+            \frac{\partial \boldsymbol{z}}{\partial \boldsymbol{x}}=\frac{\partial \boldsymbol{y}}{\partial \boldsymbol{x}} \frac{\partial \boldsymbol{z}}{\partial \boldsymbol{y}} \quad \in \mathbb{R}^{M \times N} 
+            \end{align*}
         \end{itemize}
         利用矩阵微积分对 $\mathcal{R}(\boldsymbol{w})$ 关于 $\boldsymbol{w}$ 求导并令导数为零，我们即可得到经验风险最小化下最优参数的解析表达式：
         \begin{equation*}
@@ -220,13 +260,12 @@
     \begin{itemize}
         \item \textbf{核心思想}：不同于将参数看作固定常数的极大似然方法，贝叶斯估计将参数 $\boldsymbol{w}$ 本身也视作一个随机变量，去寻找结合数据更新后参数表现出的概率分布（即后验分布）。严格的贝叶斯推断将参数本身视为随机变量，它最终求解得到的是一个完整的后验分布 $p(\boldsymbol{w}|\boldsymbol{X}, \boldsymbol{y})$，这本质上提供了参数取值的区间概率估计（反映了对参数的不确定性）。
         \item \textbf{从贝叶斯公式到后验对数}：根据贝叶斯公式推断，若假设似然的噪声方差为 $\sigma^2$ ，且参数先验服从零均值高斯分布 $\mathcal{N}(\boldsymbol{0}, \nu^2\boldsymbol{I})$，对后验概率展开并取对数后，可得如下推导式（省略常数项）：
-        \begin{equation*}
-        \begin{aligned}
+        \begin{align*}
         \log p(\boldsymbol{w} \mid \boldsymbol{X}, \boldsymbol{y} ; \nu, \sigma) & \propto \log p(\boldsymbol{y} \mid \boldsymbol{X}, \boldsymbol{w} ; \sigma)+\log p(\boldsymbol{w} ; \nu) \\
         & \propto-\frac{1}{2 \sigma^2} \sum_{n=1}^N\left(y^{(n)}-\boldsymbol{w}^{\top} \boldsymbol{x}^{(n)}\right)^2-\frac{1}{2 \nu^2} \boldsymbol{w}^{\top} \boldsymbol{w}, \\
         & =-\frac{1}{2 \sigma^2}\left\|\boldsymbol{y}-\boldsymbol{X}^{\top} \boldsymbol{w}\right\|^2-\frac{1}{2 \nu^2} \boldsymbol{w}^{\top} \boldsymbol{w} .
-        \end{aligned}
-        \end{equation*}
+        \end{align*}
+        这里计算出的条件概率 $p(\boldsymbol{w} \mid \boldsymbol{X}, \boldsymbol{y} ; \nu, \sigma)$ 实际上代表了在给定当前观测数据 $\boldsymbol{X}$ 和 $\boldsymbol{y}$ 的情况下，模型参数 $\boldsymbol{w}$ 取不同值的后验概率分布。
         \item \textbf{预测新特征的标签}：在得到完整后验分布的解析或近似表达后，对于给出的全新特征向量 $\boldsymbol{x}^*$，真正严格的贝叶斯估计并不会简单取单一参数来计算，而是通过对整个后验分布内的参数空间进行无偏的积分输出新标签预测的分布。
 
         具体到线性回归模型中，$p(y^* \mid \boldsymbol{x}^*, \boldsymbol{w})$ 实际上就是均值为 $\boldsymbol{w}^\top \boldsymbol{x}^*$、方差为 $\sigma^2$ 的高斯概率密度函数。在这里，我们将 $y^*$ 和 $\boldsymbol{w}$ 放在联合分布中考虑，然后通过对未知的随机向量 $\boldsymbol{w}$ 积分求得该边际分布：
