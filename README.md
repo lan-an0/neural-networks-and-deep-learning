@@ -106,5 +106,5 @@
 
 本仓库采用双重许可：
 
-- **笔记讲义 (Notes)**：`notes/` 目录下的所有内容受 [Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)](notes/LICENSE) 保护。你可以自由分享和演绎，但必须署名且不可用于商业目的。
+- **笔记讲义 & 讲义 (Notes/slides)**：`notes/` 和 `slides/` 目录下的所有内容受 [Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)](notes/LICENSE) 保护。你可以自由分享和演绎，但必须署名且不可用于商业目的。
 - **实验代码 (Labs)**：`labs/` 目录下的所有代码采用 [MIT License](labs/LICENSE) 授权。你可以自由地使用、修改和分发这些代码。
